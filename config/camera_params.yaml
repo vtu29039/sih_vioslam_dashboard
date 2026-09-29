@@ -1,0 +1,19 @@
+camera:
+  width: 640
+  height: 480
+  fps: 30
+  fx: 615.0
+  fy: 615.0
+  cx: 320.0
+  cy: 240.0
+
+dynafusion:
+  fast_threshold: 20
+  optical_flow_diff_thresh: 25
+  max_corners: 150
+  quality_level: 0.2
+  min_distance: 7.0
+
+risk_thresholds:
+  critical_dist_m: 1.0
+  warning_dist_m: 2.2
