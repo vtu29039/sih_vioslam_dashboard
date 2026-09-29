@@ -1,26 +1,36 @@
 import streamlit as st
 import cv2
-from streamlit_webrtc import webrtc_streamer, RTCConfiguration, VideoProcessorBase
+import av
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 
-# STUN server configuration for cloud WebRTC traversal
 RTC_CONFIGURATION = RTCConfiguration(
     {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
 )
 
-class VIOCameraProcessor(VideoProcessorBase):
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        
-        # Apply your DynaFusion-VIO feature masking or processing here
-        # Example: img = dynafusion_engine.process_frame(img)
-        
-        return img
-
 st.title("VIO-SLAM Vehicle Risk & Navigation Dashboard")
+
+def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
+    # 1. Convert PyAV VideoFrame to NumPy BGR array for OpenCV
+    img = frame.to_ndarray(format="bgr24")
+
+    # 2. Add your DynaFusion-VIO dynamic feature masking / live analysis here
+    # Example: Draw live tracking metrics / dynamic mask directly onto 'img'
+    cv2.putText(
+        img, 
+        "VIO-SLAM: ACTIVE (LIVE ANALYSIS)", 
+        (20, 50), 
+        cv2.FONT_HERSHEY_SIMPLEX, 
+        0.8, 
+        (0, 255, 0), 
+        2
+    )
+
+    # 3. Return the processed OpenCV frame back as an av.VideoFrame to render live
+    return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 webrtc_streamer(
     key="vio-slam-stream",
-    video_processor_factory=VIOCameraProcessor,
+    video_frame_callback=video_frame_callback,
     rtc_configuration=RTC_CONFIGURATION,
     media_stream_constraints={"video": True, "audio": False},
 )
